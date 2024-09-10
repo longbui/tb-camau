@@ -192,5 +192,5 @@ conmat_values = [
     [48.81598392, 150.93501514, 291.62499058, 400.27172231, 480.37900611, 170.9479575],
 ]
 
-matrix = np.array(values)
+mixing_matrix = np.array(values)
 conmat = np.array(conmat_values)

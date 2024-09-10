@@ -25,7 +25,7 @@ def build_model(
     infectious_compartments: List[str],
     age_strata: List[int],
     fixed_params: Dict[str, any],
-    matrix,
+    matrix: List[List[float]],
     covid_effects: Dict[str, bool],
     improved_detection_multiplier: float = None,
 ) -> CompartmentalModel:
@@ -68,7 +68,7 @@ def build_model(
     model.add_universal_death_flows(
         "universal_death", 1.0
     )  # Adjusted later by age stratification
-    add_infection_flow(model, covid_effects['contact_reduction'])
+    add_infection_flow(model, covid_effects["contact_reduction"])
     add_latency_flow(model)
     # Add self-recovery flow
     model.add_transition_flow(
@@ -91,8 +91,15 @@ def build_model(
         fixed_params,
         matrix,
     )
+
     model.stratify_with(age_strat)
-    organ_strat = get_organ_strat(infectious_compartments, organ_strata, fixed_params, covid_effects['detection_reduction'], improved_detection_multiplier)
+    organ_strat = get_organ_strat(
+        infectious_compartments,
+        organ_strata,
+        fixed_params,
+        covid_effects["detection_reduction"],
+        improved_detection_multiplier,
+    )
     model.stratify_with(organ_strat)
     request_model_outputs(
         model,
@@ -101,7 +108,7 @@ def build_model(
         infectious_compartments,
         age_strata,
         organ_strata,
-        covid_effects['detection_reduction']
+        covid_effects["detection_reduction"],
     )
     return model
 
@@ -132,13 +139,14 @@ def add_infection_flow(model: CompartmentalModel, contact_reduction):
             "rr_infection_recovered",
         ),
     ]
-    contact_rate = Parameter("contact_rate") * (
-        get_linear_interpolation_function(
+    # contact_rate = Parameter("contact_rate") * (
+    #     130 if homo_mixing else 1
+    # )  # switch to homo mixing
+    contact_rate = Parameter("contact_rate")
+    if contact_reduction:
+        contact_rate *= get_linear_interpolation_function(
             [2020.0, 2021.0, 2022], [1.0, 1 - Parameter("contact_reduction"), 1.0]
         )
-        if contact_reduction
-        else 1.0
-    )
     for origin, modifier in infection_flows:
         process = f"infection_from_{origin}"
         modifier = Parameter(modifier) if modifier else 1.0
@@ -215,10 +223,10 @@ def seed_infectious(model: CompartmentalModel):
         Parameter("seed_duration"),
         Parameter("seed_num"),
     ]
-    voc_seed_func = Function(triangle_wave_func, seed_args)
+    seed_func = Function(triangle_wave_func, seed_args)
     model.add_importation_flow(
         "seed_infectious",
-        voc_seed_func,
+        seed_func,
         "infectious",
         split_imports=True,
     )

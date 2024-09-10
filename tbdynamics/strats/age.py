@@ -19,7 +19,7 @@ def get_age_strat(
     age_strata: List[int],
     death_df: DataFrame,
     fixed_params: Dict[str, any],
-    matrix: List[List[float]],
+    matrix: List[List[float]] = None,
 ) -> AgeStratification:
     """
     Creates and configures an age stratification for a compartmental model. This includes setting up

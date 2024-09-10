@@ -6,7 +6,7 @@ import arviz as az
 import pandas as pd
 from typing import List, Dict, Tuple
 from tbdynamics.model import build_model
-from tbdynamics.inputs import load_params, load_targets, matrix
+from tbdynamics.inputs import load_params, load_targets, mixing_matrix
 from tbdynamics.constants import (
     age_strata,
     compartments,
@@ -17,7 +17,7 @@ from tbdynamics.constants import (
 from numpyro import distributions as dist
 import numpy as np
 
-def get_bcm(params, covid_effects = None, improved_detection_multiplier = None) -> BayesianCompartmentalModel:
+def get_bcm(params, covid_effects = None, improved_detection_multiplier = None, homo_mixing=True) -> BayesianCompartmentalModel:
     """
     Constructs and returns a Bayesian Compartmental Model.
     Parameters:
@@ -31,6 +31,12 @@ def get_bcm(params, covid_effects = None, improved_detection_multiplier = None) 
     """
     params = params or {}
     fixed_params = load_params()
+    matrix_homo = np.ones((6, 6))
+    matrix = matrix_homo if homo_mixing else mixing_matrix
+    priors = get_all_priors(covid_effects)
+    # contact_prior = esp.UniformPrior("contact_rate", (0.06, 300.0) if homo_mixing else (0.001, 0.05))
+    priors.insert(0,esp.UniformPrior("contact_rate", (0.06, 300.0) if homo_mixing else (0.001, 0.05)))# Inserts at the first position in the list
+    targets = get_targets()
     tb_model = build_model(
         compartments,
         latent_compartments,
@@ -41,8 +47,6 @@ def get_bcm(params, covid_effects = None, improved_detection_multiplier = None) 
         covid_effects,
         improved_detection_multiplier
     )
-    priors = get_all_priors(covid_effects)
-    targets = get_targets()
     return BayesianCompartmentalModel(tb_model, params, priors, targets)
 
 
@@ -53,9 +57,9 @@ def get_all_priors(covid_effects) -> List:
         All the priors used under any analyses
     """
     priors = [
-        esp.UniformPrior("contact_rate", (0.001, 0.05)),
+        # esp.UniformPrior("contact_rate", (0.001, 0.05)),
         # esp.TruncNormalPrior("contact_rate", 0.0255, 0.00817,  (0.001, 0.05)),
-        # esp.UniformPrior("start_population_size", (2000000.0, 4000000.0)),
+        esp.UniformPrior("start_population_size", (1.0, 300000.0)),
         esp.BetaPrior("rr_infection_latent", 3.0, 8.0),
         esp.BetaPrior("rr_infection_recovered", 2.0, 2.0),
         # esp.UniformPrior("rr_infection_latent", (0.2, 0.5)), 
@@ -80,7 +84,8 @@ def get_all_priors(covid_effects) -> List:
         ),
         esp.UniformPrior("screening_scaleup_shape", (0.05, 0.5)),
         esp.TruncNormalPrior("screening_inflection_time", 1998, 6.0, (1986, 2010)),
-        esp.GammaPrior.from_mode("time_to_screening_end_asymp", 2.0, 5.0),
+        # esp.GammaPrior.from_mode("time_to_screening_end_asymp", 2.0, 5.0),
+        esp.UniformPrior("time_to_screening_end_asymp", (0.1, 0.8))
     ]
     if covid_effects["contact_reduction"]:
         priors.append(esp.UniformPrior("contact_reduction", (0.01, 0.8)))
@@ -106,19 +111,19 @@ def get_targets() -> List:
     - list: A list of Target instances.
     """
     target_data = load_targets()
-    notif_dispersion = esp.UniformPrior("notif_dispersion", (1000.0, 15000.0))
-    prev_dispersion = esp.UniformPrior("prev_dispersion", (20.0, 70.0))
+    notif_dispersion = esp.UniformPrior("notif_dispersion", (10.0, 150.0))
+    # prev_dispersion = esp.UniformPrior("prev_dispersion", (20.0, 70.0))
     # sptb_dispersion = esp.UniformPrior("sptb_dispersion", (5.0,30.0))
     return [
         est.NormalTarget(
-            "total_population", target_data["total_population"], stdev=100000.0
+            "total_population", target_data["total_population"], stdev=1000
         ),
         est.NormalTarget("notification", target_data["notification"], notif_dispersion),
-        est.NormalTarget(
-            "adults_prevalence_pulmonary",
-            target_data["adults_prevalence_pulmonary_target"],
-            prev_dispersion,
-        ),
+        # est.NormalTarget(
+        #     "adults_prevalence_pulmonary",
+        #     target_data["adults_prevalence_pulmonary_target"],
+        #     prev_dispersion,
+        # ),
         # est.NormalTarget("prevalence_smear_positive", target_data["prevalence_smear_positive_target"], sptb_dispersion),
     ]
 
