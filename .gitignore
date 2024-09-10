@@ -1,0 +1,11 @@
+notebook/*
+outputs/
+*.pyc
+*ipynb_checkpoints*
+*.egg-info
+*.egg
+.vscode/
+__pycache__/
+supplement/*
+test_files/
+docs/*
