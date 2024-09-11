@@ -24,7 +24,7 @@ notification: #from https://www.who.int/teams/global-tuberculosis-programme/tb-r
 #   2022: [176.0, 121.0, 251.0]
 
 percentage_latent:
-  2019: 36.5
+  2019: [36.5, 33.4, 40.40]
 
 # mortality_raw:
 #   2018: 13850.0

@@ -174,6 +174,7 @@ def plot_output_ranges(
             "prevalence_smear_positive",
             "adults_prevalence_pulmonary",
             "incidence",
+            "percantage_latent_adults"
         ]:
             target_series = target_data[f"{ind}_target"]
             lower_bound_series = target_data[f"{ind}_lower_bound"]

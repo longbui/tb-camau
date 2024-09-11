@@ -59,14 +59,14 @@ def get_all_priors(covid_effects) -> List:
     priors = [
         # esp.UniformPrior("contact_rate", (0.001, 0.05)),
         # esp.TruncNormalPrior("contact_rate", 0.0255, 0.00817,  (0.001, 0.05)),
-        esp.UniformPrior("start_population_size", (1.0, 300000.0)),
+        # esp.UniformPrior("start_population_size", (1.0, 300000.0)),
         esp.BetaPrior("rr_infection_latent", 3.0, 8.0),
         esp.BetaPrior("rr_infection_recovered", 2.0, 2.0),
         # esp.UniformPrior("rr_infection_latent", (0.2, 0.5)), 
         # esp.UniformPrior("rr_infection_recovered", (0.2, 1.0)),
         # esp.TruncNormalPrior("rr_infection_latent", 0.35, 0.1, (0.2, 0.5)), #2608
         # esp.TruncNormalPrior("rr_infection_recovered", 0.6, 0.2, (0.2, 1.0)),
-        esp.GammaPrior.from_mode("progression_multiplier", 1.0, 2.0),
+        esp.UniformPrior("progression_multiplier", (0.5, 5.0)),
         # esp.UniformPrior("seed_time", (1800.0, 1840.0)),
         # esp.UniformPrior("seed_num", (1.0, 100.00)),
         # esp.UniformPrior("seed_duration", (1.0, 20.0)),
@@ -85,7 +85,7 @@ def get_all_priors(covid_effects) -> List:
         esp.UniformPrior("screening_scaleup_shape", (0.05, 0.5)),
         esp.TruncNormalPrior("screening_inflection_time", 1998, 6.0, (1986, 2010)),
         # esp.GammaPrior.from_mode("time_to_screening_end_asymp", 2.0, 5.0),
-        esp.UniformPrior("time_to_screening_end_asymp", (0.1, 0.8))
+        esp.UniformPrior("time_to_screening_end_asymp", (0.1, 2.0))
     ]
     if covid_effects["contact_reduction"]:
         priors.append(esp.UniformPrior("contact_reduction", (0.01, 0.8)))
@@ -114,6 +114,7 @@ def get_targets() -> List:
     notif_dispersion = esp.UniformPrior("notif_dispersion", (10.0, 150.0))
     # prev_dispersion = esp.UniformPrior("prev_dispersion", (20.0, 70.0))
     # sptb_dispersion = esp.UniformPrior("sptb_dispersion", (5.0,30.0))
+    latent_dispersion = esp.UniformPrior("latent_dispersion", (2.0,10.0))
     return [
         est.NormalTarget(
             "total_population", target_data["total_population"], stdev=1000
@@ -124,7 +125,7 @@ def get_targets() -> List:
         #     target_data["adults_prevalence_pulmonary_target"],
         #     prev_dispersion,
         # ),
-        # est.NormalTarget("prevalence_smear_positive", target_data["prevalence_smear_positive_target"], sptb_dispersion),
+        est.NormalTarget("percentage_latent_adults", target_data["percentage_latent_adults"], latent_dispersion),
     ]
 
 

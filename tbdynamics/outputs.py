@@ -125,11 +125,22 @@ def request_model_outputs(
             compartments,
             strata={"age": str(age_stratum)},
         )
+        model.request_output_for_compartments(
+            f"latent_population_sizeXage_{age_stratum}",
+            latent_compartments,
+            strata={"age": str(age_stratum)},
+            )
     # request adults poppulation
     adults_pop = [
         f"total_populationXage_{adults_stratum}" for adults_stratum in [15, 35, 50, 70]
     ]
-    model.request_aggregate_output("adults_pop", adults_pop)
+    latent_pop = [
+        f"latent_population_sizeXage_{adults_stratum}" for adults_stratum in [15, 35, 50, 70]
+    ]
+    adults_pop = model.request_aggregate_output("adults_pop", adults_pop)
+    #request latent among adults
+    latent_pop = model.request_aggregate_output("latent_adults", latent_pop)
+    model.request_function_output("percentage_latent_adults", latent_pop / adults_pop * 100)
     for organ_stratum in organ_strata:
         model.request_output_for_compartments(
             f"total_infectiousXorgan_{organ_stratum}",
@@ -155,8 +166,8 @@ def request_model_outputs(
     ]
     model.request_aggregate_output("adults_smear_positive", adults_smear_positive)
     model.request_function_output(
-        "prevalence_smear_positive",
-        1e5 * DerivedOutput("adults_smear_positive") / DerivedOutput("adults_pop"),
+        "prevalence_adults_smear_positive",
+        1e5 * DerivedOutput("adults_smear_positive") / adults_pop
     )
     # request adults pulmonary (smear postive + smear neagative)
     adults_pulmonary = [
@@ -164,10 +175,10 @@ def request_model_outputs(
         for adults_stratum in [15, 35, 50, 70]
         for smear_status in ["smear_positive", "smear_negative"]
     ]
-    model.request_aggregate_output("adults_pulmonary", adults_pulmonary)
+    adults_pulmonary = model.request_aggregate_output("adults_pulmonary", adults_pulmonary)
     model.request_function_output(
         "adults_prevalence_pulmonary",
-        1e5 * DerivedOutput("adults_pulmonary") / DerivedOutput("adults_pop"),
+        1e5 * adults_pulmonary / adults_pop,
     )
     detection_func = Function(
         tanh_based_scaleup,
