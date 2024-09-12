@@ -35,7 +35,7 @@ def get_bcm(params, covid_effects = None, improved_detection_multiplier = None, 
     matrix = matrix_homo if homo_mixing else mixing_matrix
     priors = get_all_priors(covid_effects)
     # contact_prior = esp.UniformPrior("contact_rate", (0.06, 300.0) if homo_mixing else (0.001, 0.05))
-    priors.insert(0,esp.UniformPrior("contact_rate", (0.06, 300.0) if homo_mixing else (0.001, 0.05)))# Inserts at the first position in the list
+    priors.insert(0,esp.UniformPrior("contact_rate", (1.0, 50.0) if homo_mixing else (0.001, 0.05)))# Inserts at the first position in the list
     targets = get_targets()
     tb_model = build_model(
         compartments,
@@ -60,7 +60,7 @@ def get_all_priors(covid_effects) -> List:
         # esp.UniformPrior("contact_rate", (0.001, 0.05)),
         # esp.TruncNormalPrior("contact_rate", 0.0255, 0.00817,  (0.001, 0.05)),
         # esp.UniformPrior("start_population_size", (1.0, 300000.0)),
-        esp.BetaPrior("rr_infection_latent", 3.0, 8.0),
+        esp.BetaPrior("rr_infection_latent", 3.0, 8.0), #2508
         esp.BetaPrior("rr_infection_recovered", 2.0, 2.0),
         # esp.UniformPrior("rr_infection_latent", (0.2, 0.5)), 
         # esp.UniformPrior("rr_infection_recovered", (0.2, 1.0)),
@@ -125,7 +125,7 @@ def get_targets() -> List:
         #     target_data["adults_prevalence_pulmonary_target"],
         #     prev_dispersion,
         # ),
-        est.NormalTarget("percentage_latent_adults", target_data["percentage_latent_adults"], latent_dispersion),
+        est.NormalTarget("percentage_latent", target_data["percentage_latent_target"], latent_dispersion),
     ]
 
 
