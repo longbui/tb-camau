@@ -12,7 +12,7 @@ from .utils import triangle_wave_func
 from .inputs import get_birth_rate, get_death_rate, process_death_rate
 from .constants import organ_strata
 from .outputs import request_model_outputs
-from .strats import get_age_strat, get_organ_strat
+from .strats import get_age_strat, get_organ_strat, get_act3_strat
 
 
 BASE_PATH = Path(__file__).parent.parent.resolve()
@@ -101,6 +101,8 @@ def build_model(
         improved_detection_multiplier,
     )
     model.stratify_with(organ_strat)
+    act3_strat = get_act3_strat(compartments, fixed_params["act3_stratification"])
+    model.stratify_with(act3_strat)
     request_model_outputs(
         model,
         compartments,
