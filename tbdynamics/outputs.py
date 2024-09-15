@@ -13,7 +13,7 @@ def request_model_outputs(
     infectious_compartments: List[str],
     age_strata: List[int],
     organ_strata: List[str],
-    detection_reduction
+    detection_reduction,
 ):
     """
     Requests various model outputs
@@ -48,7 +48,7 @@ def request_model_outputs(
     model.request_cumulative_output(
         "cumulative_deaths",
         "mortality_raw",
-        start_time=2016.0,
+        start_time=2014.0,
     )
     model.request_function_output(
         "mortality",
@@ -108,7 +108,7 @@ def request_model_outputs(
     )
     model.request_function_output("extra_notif_perc", extra_notif / notif * 100)
     # case notification rate:
-    model.request_function_output("case_notification_rate", notif / incidence_raw * 100)
+    # model.request_function_output("case_notification_rate", notif / incidence_raw * 100)
 
     # Request proportion of each compartment in the total population
     for compartment in compartments:
@@ -129,18 +129,21 @@ def request_model_outputs(
             f"latent_population_sizeXage_{age_stratum}",
             latent_compartments,
             strata={"age": str(age_stratum)},
-            )
+        )
     # request adults poppulation
     adults_pop = [
         f"total_populationXage_{adults_stratum}" for adults_stratum in [15, 35, 50, 70]
     ]
     latent_pop = [
-        f"latent_population_sizeXage_{adults_stratum}" for adults_stratum in [15, 35, 50, 70]
+        f"latent_population_sizeXage_{adults_stratum}"
+        for adults_stratum in [15, 35, 50, 70]
     ]
     adults_pop = model.request_aggregate_output("adults_pop", adults_pop)
-    #request latent among adults
+    # request latent among adults
     latent_pop = model.request_aggregate_output("latent_adults", latent_pop)
-    model.request_function_output("percentage_latent_adults", latent_pop / adults_pop * 100)
+    model.request_function_output(
+        "percentage_latent_adults", latent_pop / adults_pop * 100
+    )
     for organ_stratum in organ_strata:
         model.request_output_for_compartments(
             f"total_infectiousXorgan_{organ_stratum}",
@@ -156,7 +159,7 @@ def request_model_outputs(
         model.request_function_output(
             f"prop_{organ_stratum}",
             DerivedOutput(f"total_infectiousXorgan_{organ_stratum}")
-            / DerivedOutput("infectious_population_size"),
+            / infectious_population_size,
         )
 
     # Request adults smear_positive
@@ -164,10 +167,11 @@ def request_model_outputs(
         f"total_infectiousXorgan_smear_positiveXage_{adults_stratum}"
         for adults_stratum in [15, 35, 50, 70]
     ]
-    model.request_aggregate_output("adults_smear_positive", adults_smear_positive)
+    adults_smear_positive = model.request_aggregate_output(
+        "adults_smear_positive", adults_smear_positive
+    )
     model.request_function_output(
-        "prevalence_adults_smear_positive",
-        1e5 * DerivedOutput("adults_smear_positive") / adults_pop
+        "adults_prevalence_smear_positive", 1e5 * adults_smear_positive / adults_pop
     )
     # request adults pulmonary (smear postive + smear neagative)
     adults_pulmonary = [
@@ -175,11 +179,58 @@ def request_model_outputs(
         for adults_stratum in [15, 35, 50, 70]
         for smear_status in ["smear_positive", "smear_negative"]
     ]
-    adults_pulmonary = model.request_aggregate_output("adults_pulmonary", adults_pulmonary)
+    adults_pulmonary = model.request_aggregate_output(
+        "adults_pulmonary", adults_pulmonary
+    )
     model.request_function_output(
         "adults_prevalence_pulmonary",
         1e5 * adults_pulmonary / adults_pop,
     )
+
+    # request outputs for act3
+    for act3_stratum in ["trial", "control", "other"]:
+        for age_stratum in age_strata:
+            # Request population output for each ACT3 and age stratum combination
+            model.request_output_for_compartments(
+                f"total_populationXact3_{act3_stratum}Xage_{age_stratum}",
+                compartments,
+                strata={"act3": str(act3_stratum), "age": str(age_stratum)},
+            )
+
+            # Request infectious compartments output for each ACT3, organ, and age stratum combination
+            for organ_stratum in organ_strata:
+                model.request_output_for_compartments(
+                    f"total_infectiousXact3_{act3_stratum}Xorgan_{organ_stratum}Xage_{age_stratum}",
+                    infectious_compartments,
+                    strata={
+                        "act3": str(act3_stratum),
+                        "organ": str(organ_stratum),
+                        "age": str(age_stratum),
+                    },
+                )
+        act3_adults_pulmonary = [
+            f"total_infectiousXact3_{act3_stratum}Xorgan_{smear_status}Xage_{adults_stratum}"
+            for adults_stratum in [15, 35, 50, 70]
+            for smear_status in ["smear_positive", "smear_negative"]
+        ]
+        act3_adults_pop = [
+            f"total_populationXact3_{act3_stratum}Xage_{adults_stratum}"
+            for adults_stratum in [15, 35, 50, 70]
+        ]
+        model.request_aggregate_output(
+            f"act3_{act3_stratum}_adults_pulmonary", act3_adults_pulmonary
+        )
+        model.request_aggregate_output(
+            f"act3_{act3_stratum}_adults_pop", act3_adults_pop
+        )
+        model.request_function_output(
+            f"act3_{act3_stratum}_adults_prevalence",
+            1e5
+            * DerivedOutput(f"act3_{act3_stratum}_adults_pulmonary")
+            / DerivedOutput(f"act3_{act3_stratum}_adults_pop"),
+        )
+
+    # request screening profile
     detection_func = Function(
         tanh_based_scaleup,
         [

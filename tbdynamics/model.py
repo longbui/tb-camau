@@ -83,6 +83,10 @@ def build_model(
     model.add_death_flow(
         "infect_death", 1.0, "infectious"
     )  # later adjusted by organ status
+    # implement_acf = True
+    # if implement_acf: 
+    #     add_acf_detection_flow(model)
+
     age_strat = get_age_strat(
         compartments,
         infectious_compartments,
@@ -101,7 +105,7 @@ def build_model(
         improved_detection_multiplier,
     )
     model.stratify_with(organ_strat)
-    act3_strat = get_act3_strat(compartments, fixed_params["act3_stratification"])
+    act3_strat = get_act3_strat(compartments, fixed_params)
     model.stratify_with(act3_strat)
     request_model_outputs(
         model,
@@ -183,6 +187,26 @@ def add_latency_flow(model):
     ]
     for latency_flow in latency_flows:
         model.add_transition_flow(*latency_flow)
+
+
+def add_acf_detection_flow(model):
+    """
+    Applies ACF (Active Case Finding) detection flow to the model if specified in the fixed parameters.
+
+    Args:
+        model: The model object to which the transition flow is added.
+        fixed_params: A dictionary containing the fixed parameters for the model, including time-variant ACF.
+
+    Returns:
+        None
+    """
+    # Add the transition flow to the model
+    model.add_transition_flow(
+        "acf_detection",
+        0.0,
+        "infectious",
+        "on_treatment",
+    )
 
 
 def add_treatment_related_outcomes(model: CompartmentalModel) -> None:

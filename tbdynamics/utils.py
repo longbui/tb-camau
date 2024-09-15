@@ -8,6 +8,7 @@ import plotly.graph_objects as go
 from typing import List
 
 
+
 BASE_PATH = Path(__file__).parent.parent.resolve()
 DATA_PATH = BASE_PATH / "data"
 
@@ -284,5 +285,7 @@ def get_future_scenario():
         scenarios[formatted_key_2] = scenario_2_improved_treatment
 
     return scenarios
+
+
 
 

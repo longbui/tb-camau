@@ -85,7 +85,8 @@ def get_all_priors(covid_effects) -> List:
         esp.UniformPrior("screening_scaleup_shape", (0.05, 0.5)),
         esp.TruncNormalPrior("screening_inflection_time", 1998, 6.0, (1986, 2010)),
         # esp.GammaPrior.from_mode("time_to_screening_end_asymp", 2.0, 5.0),
-        esp.UniformPrior("time_to_screening_end_asymp", (0.1, 2.0))
+        esp.UniformPrior("time_to_screening_end_asymp", (0.1, 2.0)),
+        esp.UniformPrior("acf_screening_rate", (1.0, 50.0)),
     ]
     if covid_effects["contact_reduction"]:
         priors.append(esp.UniformPrior("contact_reduction", (0.01, 0.8)))
@@ -112,20 +113,17 @@ def get_targets() -> List:
     """
     target_data = load_targets()
     notif_dispersion = esp.UniformPrior("notif_dispersion", (10.0, 150.0))
-    # prev_dispersion = esp.UniformPrior("prev_dispersion", (20.0, 70.0))
-    # sptb_dispersion = esp.UniformPrior("sptb_dispersion", (5.0,30.0))
     latent_dispersion = esp.UniformPrior("latent_dispersion", (2.0,10.0))
+    act3_trial_prev_dispersion = esp.UniformPrior("act3_trial_prev_dispersion", (5.0,30.0))
+    act3_control_prev_dispersion = esp.UniformPrior("act3_control_prev_dispersion", (5.0,30.0))
     return [
         est.NormalTarget(
             "total_population", target_data["total_population"], stdev=1000
         ),
         est.NormalTarget("notification", target_data["notification"], notif_dispersion),
-        # est.NormalTarget(
-        #     "adults_prevalence_pulmonary",
-        #     target_data["adults_prevalence_pulmonary_target"],
-        #     prev_dispersion,
-        # ),
         est.NormalTarget("percentage_latent", target_data["percentage_latent_target"], latent_dispersion),
+        est.NormalTarget("act3_trial_adults_prevalence", target_data["act3_trial_adults_prevalence"], act3_trial_prev_dispersion),
+        est.NormalTarget("act3_control_adults_prevalence", target_data["act3_control_adults_prevalence"], act3_control_prev_dispersion)
     ]
 
 
