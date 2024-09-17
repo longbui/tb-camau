@@ -83,9 +83,9 @@ def build_model(
     model.add_death_flow(
         "infect_death", 1.0, "infectious"
     )  # later adjusted by organ status
-    # implement_acf = True
-    # if implement_acf: 
-    #     add_acf_detection_flow(model)
+    implement_acf = True
+    if implement_acf: 
+        add_acf_detection_flow(model)
 
     age_strat = get_age_strat(
         compartments,
@@ -203,7 +203,7 @@ def add_acf_detection_flow(model):
     # Add the transition flow to the model
     model.add_transition_flow(
         "acf_detection",
-        0.0,
+        1.0,
         "infectious",
         "on_treatment",
     )

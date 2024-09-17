@@ -66,20 +66,19 @@ def get_act3_strat(
 
   
     # adjust detection flow for act3 with active case finding, only for trial
-    intervention_multiplier = 0.9
     for age in age_strata:
         # Initialize adjustment for each age and strata
-        intervention_adjustments = {stratum: 1.0 for stratum in requested_strata}
+        intervention_adjustments = {stratum: 0.0 for stratum in requested_strata}
 
         if age not in [0, 5]:
             # Define intervention parameters
             intervention_stratum = "trial"
             times = [2014.25, 2014.26, 2018, 2018.2]
             vals = [
-                1.0,  # Value for 2014
-                intervention_multiplier * Parameter("acf_screening_rate"),  # Value for 2014.2
-                intervention_multiplier * Parameter("acf_screening_rate"),  # Value for 2018
-                1.0,  # Value for 2018.2
+                0.0,  # Value for 2014
+                1.9,  # Value for 2014.2
+                1.9,  # Value for 2018
+                0.0,  # Value for 2018.2
             ]
 
             # Generate interpolation function and set the adjustment
@@ -87,7 +86,7 @@ def get_act3_strat(
 
         # Set the flow adjustments without needing to loop over interventions
         strat.set_flow_adjustments(
-            "detection", 
+            "acf_detection", 
             {k: Multiply(v) for k, v in intervention_adjustments.items()},
             source_strata={"age": str(age)}
         )
