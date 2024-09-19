@@ -1,9 +1,7 @@
 total_population:
   2019: 1194300.0
 
-notification: #from https://www.who.int/teams/global-tuberculosis-programme/tb-reports/global-tuberculosis-report-2023/tb-diagnosis---treatment/2-1-case-notifications
-  # 2010: 99022
-  # 2011: 100518
+notification:
   2012: 1485.0
   2013: 1369.0
   2014: 1405.0
@@ -23,7 +21,7 @@ notification: #from https://www.who.int/teams/global-tuberculosis-programme/tb-r
 # incidence:
 #   2022: [176.0, 121.0, 251.0]
 
-percentage_latent:
+percentage_latent_adults:
   2019: [36.5, 33.4, 40.40]
 
 

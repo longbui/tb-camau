@@ -26,7 +26,7 @@ def get_act3_strat(
     # Initialize the mixing matrix
     mixing_matrix = np.zeros((n_strata, n_strata))
 
-    # Populate the mixing matrix based on within- and between-strata mixing
+    # # Populate the mixing matrix based on within- and between-strata mixing
     for i in range(n_strata):
         for j in range(n_strata):
             if i == j:

@@ -106,7 +106,7 @@ def request_model_outputs(
         flow_name="detection",
         source_strata={"organ": "extrapulmonary"},
     )
-    model.request_function_output("extra_notif_perc", extra_notif / notif * 100)
+    model.request_function_output("extra_notif_prop", extra_notif / notif * 100)
     # case notification rate:
     # model.request_function_output("case_notification_rate", notif / incidence_raw * 100)
 
@@ -208,6 +208,12 @@ def request_model_outputs(
                         "age": str(age_stratum),
                     },
                 )
+                if age_stratum not in [0, 5]:
+                    model.request_output_for_flow(
+                        f"acf_detectionXact3_{act3_stratum}Xorgan_{organ_stratum}Xage_{age_stratum}",
+                        "acf_detection",
+                        dest_strata={"act3": str(act3_stratum),"organ": str(organ_stratum), "age": str(age_stratum)},
+                    )
         act3_adults_pulmonary = [
             f"total_infectiousXact3_{act3_stratum}Xorgan_{smear_status}Xage_{adults_stratum}"
             for adults_stratum in [15, 35, 50, 70]
@@ -229,6 +235,7 @@ def request_model_outputs(
             * DerivedOutput(f"act3_{act3_stratum}_adults_pulmonary")
             / DerivedOutput(f"act3_{act3_stratum}_adults_pop"),
         )
+    model.request_output_for_flow("acf_detection", "acf_detection")
 
     # request screening profile
     detection_func = Function(
