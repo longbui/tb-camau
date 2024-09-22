@@ -67,6 +67,7 @@ def get_all_priors(covid_effects) -> List:
         # esp.TruncNormalPrior("rr_infection_latent", 0.35, 0.1, (0.2, 0.5)), #2608
         # esp.TruncNormalPrior("rr_infection_recovered", 0.6, 0.2, (0.2, 1.0)),
         esp.UniformPrior("progression_multiplier", (0.5, 5.0)),
+        # esp.UniformPrior("early_progression_multiplier", (0.5, 5.0)),
         esp.UniformPrior("seed_time", (1800.0, 1840.0)),
         esp.UniformPrior("seed_num", (1.0, 100.00)),
         esp.UniformPrior("seed_duration", (1.0, 20.0)),
@@ -85,6 +86,8 @@ def get_all_priors(covid_effects) -> List:
         esp.UniformPrior("screening_scaleup_shape", (0.05, 0.5)),
         esp.TruncNormalPrior("screening_inflection_time", 1998, 6.0, (1986, 2010)),
         esp.GammaPrior.from_mode("time_to_screening_end_asymp", 2.0, 5.0),
+        esp.UniformPrior("acf_sensitivity", (0.7,0.99)),
+        esp.UniformPrior("act3_spill_over_effects", (1.0, 2.0))
         # esp.UniformPrior("time_to_screening_end_asymp", (0.1, 2.0)),
         # esp.UniformPrior("intervention_multiplier", (1.0, 50.0)),
     ]
@@ -114,16 +117,17 @@ def get_targets() -> List:
     target_data = load_targets()
     notif_dispersion = esp.UniformPrior("notif_dispersion", (10.0, 150.0))
     latent_dispersion = esp.UniformPrior("latent_dispersion", (2.0,10.0))
-    act3_trial_prev_dispersion = esp.UniformPrior("act3_trial_prev_dispersion", (5.0,30.0))
-    act3_control_prev_dispersion = esp.UniformPrior("act3_control_prev_dispersion", (5.0,30.0))
+    acf_detectionXact3_trail_dispersion = esp.UniformPrior("acf_detectionXact3_trail_dispersion", (10.0,30.0))
+    acf_detectionXact3_control_dispersion = esp.UniformPrior("acf_detectionXact3_control_dispersion", (10.0,30.0))
     return [
         est.NormalTarget(
             "total_population", target_data["total_population"], stdev=1000
         ),
         est.NormalTarget("notification", target_data["notification"], notif_dispersion),
         est.NormalTarget("percentage_latent_adults", target_data["percentage_latent_adults_target"], latent_dispersion),
-        est.NormalTarget("act3_trial_adults_prevalence", target_data["act3_trial_adults_prevalence"], act3_trial_prev_dispersion),
-        est.NormalTarget("act3_control_adults_prevalence", target_data["act3_control_adults_prevalence"], act3_control_prev_dispersion)
+        est.NormalTarget("acf_detectionXact3_trialXorgan_pulmonary", target_data["acf_detectionXact3_trial"], acf_detectionXact3_trail_dispersion),
+        est.NormalTarget("acf_detectionXact3_controlXorgan_pulmonary", target_data["acf_detectionXact3_control"], acf_detectionXact3_control_dispersion)
+        
     ]
 
 

@@ -2,7 +2,7 @@ from typing import List, Dict
 from summer2 import Stratification
 from summer2 import Overwrite, Multiply
 from summer2.parameters import Parameter, Function, Time
-from summer2.functions.time import get_linear_interpolation_function
+from summer2.functions.time import get_linear_interpolation_function, get_sigmoidal_interpolation_function
 from tbdynamics.utils import tanh_based_scaleup
 
 
@@ -43,7 +43,10 @@ def get_organ_strat(
             1.0 / Parameter("time_to_screening_end_asymp"),
         ],
     )
-    detection_func*= (get_linear_interpolation_function([2020.0, 2021.0, 2022.0], [1.0, 1.0 - Parameter("detection_reduction"), 1.0]) if detection_reduction else 1.0)
+    # spin-over effect of ACf
+    # detection_func*= get_sigmoidal_interpolation_function([2014.0, 2016.0, 2018.0], [1.0, Parameter("act3_spill_over_effects"), 1.0])
+    # effect of covid-19
+    detection_func*= get_linear_interpolation_function([2020.0, 2021.0, 2022.0], [1.0, 1.0 - Parameter("detection_reduction"), 1.0]) if detection_reduction else 1.0
     if improved_detection_multiplier is not None:
         assert isinstance(improved_detection_multiplier, float) and improved_detection_multiplier > 0, "improved_detection_multiplier must be a positive float."
         detection_func *= get_linear_interpolation_function([2025.0, 2035.0], [1.0, improved_detection_multiplier])
@@ -89,4 +92,10 @@ def get_organ_strat(
         flow_adjs = {k: Multiply(v) for k, v in splitting_proportions.items()}
         strat.set_flow_adjustments(flow_name, flow_adjs)
 
+    # organ_adjs = {
+    #     "smear_positive": Multiply(1.0),
+    #     "smear_negative": Multiply(1.0),
+    #     "extrapulmonary": Multiply(0.0),
+    # }
+    # strat.set_flow_adjustments("acf_detection", organ_adjs)
     return strat

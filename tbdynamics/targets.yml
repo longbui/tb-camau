@@ -2,6 +2,7 @@ total_population:
   2019: 1194300.0
 
 notification:
+  2011: 1459.0
   2012: 1485.0
   2013: 1369.0
   2014: 1405.0
@@ -26,10 +27,19 @@ percentage_latent_adults:
 
 
 act3_trial_adults_prevalence:
-  2014: 389.0
-  2015: 308.0
-  2016: 176.0
-  2017: 126.0
+  2015: 389.0
+  2016: 308.0
+  2017: 176.0
+  2018: 126.0
+
+acf_detectionXact3_trial:
+  2015: 169.0
+  2016: 136.0
+  2017: 78.0
+  2018: 53.0
+
+acf_detectionXact3_control:
+  2018: 94.0
 
 act3_control_adults_prevalence:
-  2017: 226.0
+  2018: 226.0

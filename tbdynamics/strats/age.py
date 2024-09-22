@@ -53,16 +53,17 @@ def get_age_strat(
 
     # Set age-specific latency rate
     for flow_name, latency_params in fixed_params["age_latency"].items():
-        adjs = {}
-        for t in age_strata:
-            param_age_bracket = max([k for k in latency_params if k <= t])
+        latency_adjs = {}
+        for age_stratum in age_strata:
+            param_age_bracket = max([k for k in latency_params if k <= age_stratum])
             age_val = latency_params[param_age_bracket]
 
             # Apply the progression mutiplier to activation flow
-            adj = Parameter("progression_multiplier") * age_val if "late_activation" in flow_name else age_val
-            adjs[str(t)] = adj
-        adjs = {k: Overwrite(v) for k, v in adjs.items()}
-        strat.set_flow_adjustments(flow_name, adjs)
+            adj = Parameter("progression_multiplier") * age_val if "_activation" in flow_name else age_val
+            # adj = Parameter("early_progression_multiplier") * age_val if "early_activation" in flow_name else age_val
+            latency_adjs[str(age_stratum)] = adj
+        latency_adjs = {k: Overwrite(v) for k, v in latency_adjs.items()}
+        strat.set_flow_adjustments(flow_name, latency_adjs)
 
     # Infectiousness
     inf_switch_age = fixed_params["age_infectiousness_switch"]
@@ -102,8 +103,8 @@ def get_age_strat(
         list(fixed_params["time_variant_tsr"].values()),
     )
     treatment_recovery_funcs, treatment_death_funcs, treatment_relapse_funcs = {}, {}, {}
-    for age in age_strata:
-        natural_death_rate = universal_death_funcs[age]
+    for age_stratum in age_strata:
+        natural_death_rate = universal_death_funcs[age_stratum]
         treatment_outcomes = Function(
             calculate_treatment_outcomes,
             [
@@ -113,9 +114,9 @@ def get_age_strat(
                 time_variant_tsr,
             ],
         )
-        treatment_recovery_funcs[str(age)] = Multiply(treatment_outcomes[0])
-        treatment_death_funcs[str(age)] = Multiply(treatment_outcomes[1])
-        treatment_relapse_funcs[str(age)] = Multiply(treatment_outcomes[2])
+        treatment_recovery_funcs[str(age_stratum)] = Multiply(treatment_outcomes[0])
+        treatment_death_funcs[str(age_stratum)] = Multiply(treatment_outcomes[1])
+        treatment_relapse_funcs[str(age_stratum)] = Multiply(treatment_outcomes[2])
     strat.set_flow_adjustments("treatment_recovery", treatment_recovery_funcs)
     strat.set_flow_adjustments("treatment_death", treatment_death_funcs)
     strat.set_flow_adjustments("relapse", treatment_relapse_funcs)

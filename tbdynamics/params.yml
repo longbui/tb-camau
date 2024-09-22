@@ -1,5 +1,5 @@
 time_start: 1800
-time_end: 2050
+time_end: 2035
 time_step: 0.1
 
 
@@ -24,7 +24,7 @@ smear_negative_infect_multiplier: 0.25
 extrapulmonary_infect_multiplier: 0.
 incidence_props_pulmonary: 0.90
 incidence_props_smear_positive_among_pulmonary: 0.90
-prop_death_among_negative_tx_outcome: 0.03
+prop_death_among_negative_tx_outcome: 0.20
 time_variant_bcg_perc:
   1990: 49.
   1991: 71.
@@ -87,9 +87,9 @@ passive_screening_sensitivity_smear_positive: 1.0
 act3_stratification:
   strata: ["trial", "control", "other"]
   proportions:
-    trial: .048
-    control: .046
-    other: .906
+    trial: .064
+    control: .061
+    other: .875
   prop_mixing_same_stratum: .95
   adjustments:
     infection:
@@ -107,11 +107,11 @@ act3_stratification:
 
 
 # acf_screening_sensitivity: .90
-time_variant_acf:
-  - stratum_filter: { "location": "ebeye" }
-    time_variant_screening_rate:
-      2017: 0.
-      2017.01: 1.9
-      2018.: 1.9
-      2018.01: 0.
-    exclude_age: [0, 5]
+# time_variant_acf:
+#   - stratum_filter: { "location": "ebeye" }
+#     time_variant_screening_rate:
+#       2017: 0.
+#       2017.01: 1.9
+#       2018.: 1.9
+#       2018.01: 0.
+#     exclude_age: [0, 5]
