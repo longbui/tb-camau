@@ -100,13 +100,16 @@ def request_model_outputs(
     model.request_function_output("incidence", 1e5 * incidence_raw / total_population)
 
     # notification
-    notif = model.request_output_for_flow("notification", "detection")
-    extra_notif = model.request_output_for_flow(
-        name="extra_notification",
-        flow_name="detection",
-        source_strata={"organ": "extrapulmonary"},
-    )
-    model.request_function_output("extra_notif_prop", extra_notif / notif * 100)
+    model.request_output_for_flow("passive_notification", "detection")
+    model.request_output_for_flow("acf_notification", "acf_detection")
+    model.request_aggregate_output("notification", ["passive_notification", "acf_notification"])
+    for organ_stratum in organ_strata:
+        model.request_output_for_flow(
+                f"passive_notification_{organ_stratum}",
+                "detection",
+                {"organ": str(organ_stratum)},
+            )
+    # model.request_function_output("extra_notif_prop", extra_notif / notif * 100)
     # case notification rate:
     # model.request_function_output("case_notification_rate", notif / incidence_raw * 100)
 
@@ -259,7 +262,7 @@ def request_model_outputs(
         act3_pulmonary = [
             f"acf_detectionXact3_{act3_stratum}Xorgan_{organ_stratum}" for organ_stratum in organ_strata[:2]
         ]
-        model.request_aggregate_output(f"acf_detectionXact3_{act3_stratum}Xpulmonary", act3_pulmonary)
+        model.request_aggregate_output(f"acf_detectionXact3_{act3_stratum}Xorgan_pulmonary", act3_pulmonary)
     # model.request_output_for_flow("acf_detection", "acf_detection")
 
     # request screening profile

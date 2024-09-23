@@ -117,6 +117,7 @@ def get_targets() -> List:
     target_data = load_targets()
     notif_dispersion = esp.UniformPrior("notif_dispersion", (10.0, 150.0))
     latent_dispersion = esp.UniformPrior("latent_dispersion", (2.0,10.0))
+    passive_notification_smear_positive_dispersion = esp.UniformPrior("passive_notification_smear_positive_dispersion", (10.0,50.0))
     acf_detectionXact3_trail_dispersion = esp.UniformPrior("acf_detectionXact3_trail_dispersion", (10.0,30.0))
     acf_detectionXact3_control_dispersion = esp.UniformPrior("acf_detectionXact3_control_dispersion", (10.0,30.0))
     return [
@@ -125,8 +126,9 @@ def get_targets() -> List:
         ),
         est.NormalTarget("notification", target_data["notification"], notif_dispersion),
         est.NormalTarget("percentage_latent_adults", target_data["percentage_latent_adults_target"], latent_dispersion),
-        est.NormalTarget("acf_detectionXact3_trialXorgan_pulmonary", target_data["acf_detectionXact3_trial"], acf_detectionXact3_trail_dispersion),
-        est.NormalTarget("acf_detectionXact3_controlXorgan_pulmonary", target_data["acf_detectionXact3_control"], acf_detectionXact3_control_dispersion)
+        est.NormalTarget("passive_notification_smear_positive", target_data["passive_notification_smear_positive"], passive_notification_smear_positive_dispersion),
+        est.NormalTarget("acf_detectionXact3_trialXorgan_pulmonary", target_data["acf_detectionXact3_trialXorgan_pulmonary"], acf_detectionXact3_trail_dispersion),
+        est.NormalTarget("acf_detectionXact3_controlXorgan_pulmonary", target_data["acf_detectionXact3_trialXorgan_pulmonary"], acf_detectionXact3_control_dispersion)
         
     ]
 
