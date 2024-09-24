@@ -172,8 +172,6 @@ def plot_output_ranges(
         # Plot the point estimates with error bars for indicators with uncertainty bounds
         if ind in [
             "prevalence_smear_positive",
-            "adults_prevalence_pulmonary",
-            "incidence",
             "percantage_latent_adults"
         ]:
             target_series = target_data[f"{ind}_target"]
@@ -239,7 +237,7 @@ def plot_output_ranges(
 
         # Update x-axis range to fit the filtered data
         x_min = max(filtered_data.index.min(), current_plot_start_date)
-        x_max = filtered_data.index.max()
+        x_max = filtered_data.index.max() + 1
         fig.update_xaxes(range=[x_min, x_max], row=row, col=col)
 
         # Update y-axis range dynamically for each subplot

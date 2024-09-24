@@ -87,7 +87,7 @@ def get_all_priors(covid_effects) -> List:
         esp.TruncNormalPrior("screening_inflection_time", 1998, 6.0, (1986, 2010)),
         esp.GammaPrior.from_mode("time_to_screening_end_asymp", 2.0, 5.0),
         esp.UniformPrior("acf_sensitivity", (0.7,0.99)),
-        esp.UniformPrior("act3_spill_over_effects", (1.0, 2.0))
+        # esp.UniformPrior("act3_spill_over_effects", (1.0, 2.0))
         # esp.UniformPrior("time_to_screening_end_asymp", (0.1, 2.0)),
         # esp.UniformPrior("intervention_multiplier", (1.0, 50.0)),
     ]
